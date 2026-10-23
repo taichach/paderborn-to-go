@@ -2,8 +2,8 @@
   {
     "id": "poi-1",
     "name": "Paderquellen",
-    "lat": 51.7188,
-    "lng": 8.7548,
+    "lat": 51.719239, 
+    "lng": 8.751072,
     "category": "Natur",
     "tags": ["Quellgebiet", "Geologie", "Kürzester Fluss", "Karstquelle"],
     "description": "Paderborn liegt einzigartig genau auf der wichtigen Naturraumgrenze zwischen Mittelgebirge und Tiefland – markiert durch die sprudelnden Paderquellen. Sie zählen zu den am stärksten schüttenden Quellen Deutschlands: kein Bach, sondern ein Fluss von Anfang an. Im Durchschnitt sind es ca. 4.200 Liter – genug Wasser, um damit 40 Badewannen pro Sekunde füllen zu können. Diese zahlreichen Quellen sind ganz unterschiedlicher Ausprägung, einige dauerhaft schüttend, einige nur temporär wasserführend. Doch trotz ihrer imponierenden Wassermenge verliert die Pader bereits nach 4,6 Kilometern im Ortsteil Schloß Neuhaus ihren Namen. Hier mündet sie in die wesentlich wasserärmere Lippe. Die Pader gilt damit als der kürzeste Fluss Deutschlands. Die Entstehung der vielen Quellen in der Paderborner Innenstadt findet ihre Erklärung in den besonderen geologischen Verhältnissen der Westfälischen Bucht. Sie ist eine große Mulde mit mehreren übereinander liegenden, jedoch unterschiedlich wasserdurchlässigen Gesteins- schichten, die zum Muldenrand hin ansteigen. Über wasserundurchlässigem Gestein liegen wasserführende Kalksteinschichten, die nach oben hin durch den wasserstauenden Emscher-Mergel wie durch einen Deckel abgeschlossen werden. Auf der Paderborner Hochfläche versickern die auftretenden Niederschläge und Bäche in den zahlreichen Klüften und Fugen dieses Gesteins. Mehrere große Kluftsysteme sind auf Paderborn ausgerichtet, so dass große Wassermengen im Stadtzentrum zu Tage treten."
@@ -11,8 +11,8 @@
   {
     "id": "poi-2",
     "name": "Quellkeller der Kaiserpfalz",
-    "lat": 51.7198,
-    "lng": 8.7560,
+    "lat": 51.7193, 
+    "lng": 8.7555,
     "category": "Historisch",
     "tags": ["Kaiserpfalz", "Karl der Große", "Trinkwasser", "Mittelalter"],
     "description": "Im Verlauf der Eroberung Sachsens durch die Franken machte Karl der Große den Ort an den Paderquellen zum Zentrum der eroberten Region. Sichtbares Zeichen war die Errichtung eines Königspalastes und einer ersten christlichen Kirche im Jahr 776/777. Neben der Funktion als Festung und Herrschersitz bekam Paderborn auch die Funktion als Taufpfalz. Mindestens eine ergiebige Paderquelle lag unmittelbar nördlich des Palastes innerhalb der Befestigungsmauern und konnte so eine größere Anzahl von Menschen und Tieren mit Trinkwasser versorgen. Die Quellen dürften ein wichtiger Faktor für die Auswahl des Standortes gewesen sein."
@@ -20,8 +20,8 @@
   {
     "id": "poi-3",
     "name": "Kloster Abdinghof",
-    "lat": 51.7186,
-    "lng": 8.7519,
+    "lat": 51.7187, 
+    "lng": 8.7528,
     "category": "Historisch",
     "tags": ["Kloster", "Benediktiner", "Bischof Meinwerk", "Krypta"],
     "description": "Oberhalb des Paderquellgebiets thront die Abdinghofkirche mit den angrenzenden Gebäuden der Stadtverwaltung und des Paderborner Stadtmuseums. Dieses städtebauliche Ensemble blickt auf eine mehr als tausendjährige Geschichte zurück. Die ersten Mönche der 1015/16 gegründeten Benediktinerabtei Abdinghof stammten aus dem berühmten französischen Reformkloster Cluny. Der Rohbau der Kirche konnte 1031 geweiht werden. In der „geheimen Kapelle“ unterhalb des Chors, der sogenannten Krypta, wurde Bischof Meinwerk 1036 beigesetzt."
@@ -29,8 +29,8 @@
   {
     "id": "poi-4",
     "name": "Gartendenkmal",
-    "lat": 51.7191,
-    "lng": 8.7545,
+    "lat": 51.7182,
+    "lng": 8.7509,
     "category": "Natur",
     "tags": ["Gartendenkmal", "Paderquellgebiet", "Landschaftsarchitektur", "Renaturierung"],
     "description": "Das westliche Paderquellgebiet war vor dem Zweiten Weltkrieg mit Wohn- und Wirtschaftsgebäuden bebaut. Seit 2008 ist es ein eingetragenes Gartendenkmal mit einer typischen Landschaftsarchitektur der 1950er Jahre. Der Gartenarchitekt Rudolf Reuter entwarf diese Grünanlage mit hauptsächlich freien und geschwungenen Formen, die das Wasser als Hauptattraktion umfasst. Durch die Kaskaden, den großen Quellbecken, den Brücken, parallelen Bachläufen und einen erleichterten Zugang zum Wasser selbst, wird das Paderwasser mit allen Sinnen erlebbar."
@@ -38,8 +38,8 @@
   {
     "id": "poi-5",
     "name": "Brauhäuser und Kaufleute",
-    "lat": 51.7195,
-    "lng": 8.7533,
+    "lat": 51.7182,
+    "lng": 8.7509,
     "category": "Kultur",
     "tags": ["Hanse", "Bierbrauen", "Brauhaus", "Kaufleute"],
     "description": "Das 1563 errichtete „Alte Brauhaus“ zeugt noch heute von der renaissancezeitlichen Kaufmannstadt Paderborns. Typisch für dieses Bürgerbrauhaus ist u.a. der große Dachboden, welcher für das Trocknen von Gerstenmalz benutzt wurde. Zusammen mit einer Quelle der Pader im Keller waren hier gute Voraussetzungen zum Brauen von Bier, welches ein Hauptexportgut der Hansestadt Paderborns war. Seit 1295 wurde das Paderborner Bier in den nordeuropäischen Wirtschaftsraum der Hanse verkauft."
@@ -47,8 +47,8 @@
   {
     "id": "poi-6",
     "name": "Wasserkünste",
-    "lat": 51.7205,
-    "lng": 8.7541,
+    "lat": 51.7194,
+    "lng": 8.7515,
     "category": "Technik",
     "tags": ["Wasserkunst", "Börnepader", "Hebewerk", "Ingenieurkunst"],
     "description": "2017 wurde das Funktionsmodell einer Wasserkunst am historischen Standort der „Stadtwasserkunst“ von 1523 an der Börnepader errichtet. Die „Stadtwasserkunst“ war eine durch Wasserkraft angetriebene Pumpe, welche das Wasser der Börnepader in die Kümpe der Oberstadt Paderborns gepumpt hat. Dass innerhalb der Stadtmauern Paderborns drei Wasserkünste während der Frühen Neuzeit gleichzeitig existierten, ist angesichts der historisch niedrigen Einwohnerzahl eine europäische Besonderheit. Der Bau dieser Hebewerke ist selbst auch eine gesamteuropäische Leistung, weil die Baumeister vor Ort sich auf Vorlagen von griechischen, römischen, italienischen und französischen Ingenieuren stützen konnten."
@@ -56,8 +56,8 @@
   {
     "id": "poi-7",
     "name": "Ozonwasserwerk",
-    "lat": 51.7208,
-    "lng": 8.7543,
+    "lat": 51.7195,
+    "lng": 8.7513,
     "category": "Technik",
     "tags": ["Trinkwasser", "Ozonierung", "Hygiene", "Pionieranlage"],
     "description": "Von 1902 bis 1937 stand unweit des heutigen Wasserkunst-Funktionsmodells an der Börnepader eine europäische Pionieranlage zur Trinkwasseraufbereitung. Seit Mitte des 19. Jahrhunderts wurde Paderborn von schlimmen Cholera- und Typhusepidemien heimgesucht, weshalb man nach neuen technischen Möglichkeiten zur Reinigung des Trinkwassers suchte. Das neue Ozonierungsverfahren, welches von der Firma Siemens & Halske AG entwickelt worden ist, tötete krankheitserregende Keime im Trinkwasser ab. Um sich von diesem neuen Verfahren zu überzeugen, kamen Delegationen aus Paris und St. Petersburg bis an die Pader."
@@ -65,8 +65,8 @@
   {
     "id": "poi-8",
     "name": "Städtische Badeanstalten",
-    "lat": 51.7201,
-    "lng": 8.7525,
+    "lat": 51.7196,
+    "lng": 8.7507,
     "category": "Gesundheit",
     "tags": ["Kaiser-Karls-Bad", "Hygienebewegung", "Badeanstalt", "Warme Pader"],
     "description": "Auf dem Grundstück der heutigen Seniorenresidenz wurde am 30. August 1892 ein Denkmal der europäischen Hygienebewegung eröffnet, das sogenannte Kaiser-Karls-Bad. Neben einem 18 mal 8 Meter großen Schwimmbecken gab es auch Wannenbäder und das zu einer Zeit, wo noch nicht jeder Haushalt über eine eigene Badewanne verfügte. Das „Badewasser“ wurde direkt aus der „Warmen Pader“ (14° C) geschöpfft und nochmals erhitzt. Zunächst 1945 durch Fliegerbomben zerstört, dann wieder als modernstes Hallenbad in NRW wiedereröffnet, bis es schließlich 1996 aufgrund hoher Kosten abgerissen worden ist."
@@ -74,8 +74,8 @@
   {
     "id": "poi-9",
     "name": "Mühlenviertel",
-    "lat": 51.7212,
-    "lng": 8.7538,
+    "lat": 51.7204,
+    "lng": 8.7520,
     "category": "Technik",
     "tags": ["Mühle", "Schwarzendahlsche Mühle", "Wasserkraft", "Gründerzeit"],
     "description": "Die Schwarzendahlsche Mühle, welche 1873 gebaut wurde, zeugt noch heute von der Mühlenarchitektur zum Ende der „Gründerzeit“. Am Zusammenfluss der Börne-, Damm- und Warmen Pader drehten sich hier vor 1873 mehrere kleinere Mühlenräder, welche für den Bau der Schwarzendahlschen Mühle abgerissen worden sind. Die Pader bietet für den Mühlenbetrieb einzigartige Standortvoraussetzungen: Die hohe Quellschüttung (durchschn. 4.200 L/s) und die konstanten Wassertemperaturen (auch im Winter!) waren Gründe für die hohe Mühlenraddichte im Stadtkern (20 Mühlenräder im Jahr 1785)."
@@ -83,8 +83,8 @@
   {
     "id": "poi-10",
     "name": "Energetische Nutzung des Paderwassers",
-    "lat": 51.7223,
-    "lng": 8.7505,
+    "lat": 51.7219,
+    "lng": 8.7508,
     "category": "Energie",
     "tags": ["Wasserkraft", "Stümpelsche Mühle", "Stromerzeugung", "Erneuerbare Energie"],
     "description": "Das Mühlrad an der Stümpelschen Mühle dreht sich scheinbar seit Jahrhunderten. Doch der erste Eindruck täuscht. Es ist erst im Jahr 2014 installiert worden. Nicht mehr Mehl, sondern Strom wird jetzt mit der Kraft des Wassers erzeugt. Aber auch das hat Tradition. Ende des 19. Jahrhunderts stellten die ersten Müller um und betrieben mit ihren Mühlen Stromgeneratoren. So konnte 1889 bereits elektrisches Licht in Paderborn erstrahlen. Anders als die historischen Mühlen, die über Mühlengräben und Stauwerke tief in das Ökosystem Fluss eingriffen, ist die energetische Nutzung heute weniger problematisch. Vor allem wird der Flusslauf nicht verändert. Dies ist in der Regel der Fall, wenn Turbinen zur Stromerzeugung eingesetzt werden."
@@ -92,8 +92,8 @@
   {
     "id": "poi-11",
     "name": "Inselbad, Curanstalt, Ottilienquelle",
-    "lat": 51.7245,
-    "lng": 8.7482,
+    "lat": 51.7269,
+    "lng": 8.7422,
     "category": "Gesundheit",
     "tags": ["Inselbad", "Ottilienquelle", "Kurwesen", "Sanatorium"],
     "description": "Ein Bade- und Heilbetrieb lässt sich erstmals auf das Jahr 1841 datieren, als Franz Anton Evers in entsprechende Infrastruktur investierte. Damals boomte das Bade- und Kurwesen europaweit. Die heutige „Ottilienquelle“ verdankt ihren Namen der Gattin des Dortmunder Investors Friedrich Wiesehahn. Ihr Lungenleiden, so die Überlieferung, sei in den 1850er Jahren durch das Quellwasser gelindert worden. Dieser Gründungsmythos liegt der „Curanstalt Inselbad“ zugrunde, welche der Kölner Lungenarzt Dr. Wilhelm Brügelmann seit den 1880er Jahren als deutschlandweit anerkanntes Sanatorium etablierte. 1912 wurde der Kurbetrieb endgültig eingestellt. Noch bis etwa 1948 existierte hier ein öffentliches Schwimmbad."
@@ -101,8 +101,8 @@
   {
     "id": "poi-12",
     "name": "Wasserwiesenwirtschaft",
-    "lat": 51.7330,
-    "lng": 8.7360,
+    "lat": 51.7413,
+    "lng": 8.7160,
     "category": "Natur",
     "tags": ["Flößwiesen", "Landwirtschaft", "Kulturlandschaft", "Ökologie"],
     "description": "Die Verbesserung der Ertragseigenschaft von Grünland durch das gezielte Wässern (auch „Flößen“) mit Flusswässern oder Siedlungswässern war ein wesentlicher Bestandteil der historischen Kulturlandschaften in Mitteleuropa. Für Paderborn und sein Umland gewann die Flößwiesenwirtschaft insbesondere ab Mitte des 19ten Jahrhunderts an Bedeutung. Die landwirtschaftliche Intensivierung im Gefolge von Bevölkerungswachstum und damit einhergehend auch eines erhöhten Futterbedarfes für den wachsenden Viehbestand veranlasste Privateigentümer der Wiesenflächen an der Pader zu situativem, temporärem Wässern. Aus dem heutigen Blickwinkel einer industrialisierten Intensivlandwirtschaft bieten die Sekundärbiotope der Flößwiesen durch eine hohe Standortvielfalt, ausgeprägte Mikroreliefs, Wasserretention und kleinräumige Vegetationsmuster positive Auswirkungen auf die Vielfalt an Pflanzen- und Tierarten."
@@ -110,8 +110,8 @@
   {
     "id": "poi-13",
     "name": "Padersee (-umflut)",
-    "lat": 51.7385,
-    "lng": 8.7280,
+    "lat": 51.7345,
+    "lng": 8.7269,
     "category": "Natur",
     "tags": ["Padersee", "Paderseeumflut", "Hochwasserschutz", "Ökologie"],
     "description": "Der Padersee zwischen der Kernstadt Paderborn und Schloß Neuhaus wurde zwischen 1979 und 1980 angelegt. Im Hochwasserfall kann der See um bis zu einem Meter höher eingestaut werden, um auf diese Weise rund 74.000 Kubikmeter Niederschlagswasser zurückzuhalten. Im Laufe der Jahre wurde immer deutlicher, dass mit der Anlage des künstlichen Sees ökologische Probleme einhergingen: Für Fische und andere Gewässerorganismen war die Pader in voneinander getrennte Teile separiert und nicht mehr biologisch durchgängig. Zur Beseitigung der ökologischen Probleme wurde im Oktober 2018 die Paderseeumflut in Betrieb genommen. Seitdem fließt die Pader auf rund 750 m Länge um den See herum. Als Reparaturmaßnahme zur Beseitigung früherer Fehler gedacht, ist die Umflut heute zu einem ökologisch außerordentlich hochwertigen Dauerlebensraum für angepasste Tier- und Pflanzenarten geworden."
@@ -119,8 +119,8 @@
   {
     "id": "poi-14",
     "name": "Schloss Neuhaus: Barockgarten",
-    "lat": 51.7462,
-    "lng": 8.7128,
+    "lat": 51.7458,
+    "lng": 8.7119,
     "category": "Historisch",
     "tags": ["Schloss Neuhaus", "Barockgarten", "Wasserspiele", "Fürstbischof"],
     "description": "Wasser ist in Schloß Neuhaus allgegenwärtig. Betritt der Besucher heute das Schlossgelände und geht durch den Schlossinnenhof hindurch in den barocken Garten, so blickt er auf das moderne Brunnentheater mit kleinen Sprudeln und einer Spiegelung des Schlosses. Davor liegt das Parterre mit zwei Wasserbecken und kleinen Fontänen. Es wurde nach einem Gartenplan aus dem Jahr 1790 rekonstruiert. Damals schleuderte eine große Fontäne das Wasser 18 Metern in die Höhe – der zentrale Blickfang des Barockgartens. Es war Fürstbischof Clemens August, ein nachgeborener Sohn aus dem bayerischen Haus Wittelsbach, der das gesamte Schlossareal ab 1730 zu einem barocken Gesamtkunstwerk ausbaute. Neuhaus sollte dem europäischen Rang des Fürsten entsprechen. Clemens August war nämlich auch Kurfürst von Köln und damit einer der einflussreichsten Fürsten des Alten Reichs. Indem sich der Entwurf des Gartens von Franz Christoph Nagel an den bedeutenden Kunstzentren wie Würzburg, München, Wien und Paris orientierte, suchte der Bauherr die Gleichrangigkeit mit diesen politischen Orten der Macht. Das ist wohl auch gelungen. Ein zeitgenössischer Besucher schrieb beeindruckt, es handelte sich um einen „recht königlichen Garten“."
