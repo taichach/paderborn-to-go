@@ -2,8 +2,8 @@
   {
     "id": "poi-1",
     "name": "Paderquellen",
-    "lat": 51.719239, 
-    "lng": 8.751072,
+    "lat": 51.7184, 
+    "lng": 8.7514,
     "category": "Natur",
     "tags": ["Quellgebiet", "Geologie", "Kürzester Fluss", "Karstquelle"],
     "description": "Paderborn liegt einzigartig genau auf der wichtigen Naturraumgrenze zwischen Mittelgebirge und Tiefland – markiert durch die sprudelnden Paderquellen. Sie zählen zu den am stärksten schüttenden Quellen Deutschlands: kein Bach, sondern ein Fluss von Anfang an. Im Durchschnitt sind es ca. 4.200 Liter – genug Wasser, um damit 40 Badewannen pro Sekunde füllen zu können. Diese zahlreichen Quellen sind ganz unterschiedlicher Ausprägung, einige dauerhaft schüttend, einige nur temporär wasserführend. Doch trotz ihrer imponierenden Wassermenge verliert die Pader bereits nach 4,6 Kilometern im Ortsteil Schloß Neuhaus ihren Namen. Hier mündet sie in die wesentlich wasserärmere Lippe. Die Pader gilt damit als der kürzeste Fluss Deutschlands. Die Entstehung der vielen Quellen in der Paderborner Innenstadt findet ihre Erklärung in den besonderen geologischen Verhältnissen der Westfälischen Bucht. Sie ist eine große Mulde mit mehreren übereinander liegenden, jedoch unterschiedlich wasserdurchlässigen Gesteins- schichten, die zum Muldenrand hin ansteigen. Über wasserundurchlässigem Gestein liegen wasserführende Kalksteinschichten, die nach oben hin durch den wasserstauenden Emscher-Mergel wie durch einen Deckel abgeschlossen werden. Auf der Paderborner Hochfläche versickern die auftretenden Niederschläge und Bäche in den zahlreichen Klüften und Fugen dieses Gesteins. Mehrere große Kluftsysteme sind auf Paderborn ausgerichtet, so dass große Wassermengen im Stadtzentrum zu Tage treten."
@@ -29,8 +29,8 @@
   {
     "id": "poi-4",
     "name": "Gartendenkmal",
-    "lat": 51.7182,
-    "lng": 8.7509,
+    "lat": 51.7189,
+    "lng": 8.7503,
     "category": "Natur",
     "tags": ["Gartendenkmal", "Paderquellgebiet", "Landschaftsarchitektur", "Renaturierung"],
     "description": "Das westliche Paderquellgebiet war vor dem Zweiten Weltkrieg mit Wohn- und Wirtschaftsgebäuden bebaut. Seit 2008 ist es ein eingetragenes Gartendenkmal mit einer typischen Landschaftsarchitektur der 1950er Jahre. Der Gartenarchitekt Rudolf Reuter entwarf diese Grünanlage mit hauptsächlich freien und geschwungenen Formen, die das Wasser als Hauptattraktion umfasst. Durch die Kaskaden, den großen Quellbecken, den Brücken, parallelen Bachläufen und einen erleichterten Zugang zum Wasser selbst, wird das Paderwasser mit allen Sinnen erlebbar."
