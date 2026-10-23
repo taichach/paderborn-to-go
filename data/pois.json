@@ -124,5 +124,14 @@
     "category": "Historisch",
     "tags": ["Schloss Neuhaus", "Barockgarten", "Wasserspiele", "Fürstbischof"],
     "description": "Wasser ist in Schloß Neuhaus allgegenwärtig. Betritt der Besucher heute das Schlossgelände und geht durch den Schlossinnenhof hindurch in den barocken Garten, so blickt er auf das moderne Brunnentheater mit kleinen Sprudeln und einer Spiegelung des Schlosses. Davor liegt das Parterre mit zwei Wasserbecken und kleinen Fontänen. Es wurde nach einem Gartenplan aus dem Jahr 1790 rekonstruiert. Damals schleuderte eine große Fontäne das Wasser 18 Metern in die Höhe – der zentrale Blickfang des Barockgartens. Es war Fürstbischof Clemens August, ein nachgeborener Sohn aus dem bayerischen Haus Wittelsbach, der das gesamte Schlossareal ab 1730 zu einem barocken Gesamtkunstwerk ausbaute. Neuhaus sollte dem europäischen Rang des Fürsten entsprechen. Clemens August war nämlich auch Kurfürst von Köln und damit einer der einflussreichsten Fürsten des Alten Reichs. Indem sich der Entwurf des Gartens von Franz Christoph Nagel an den bedeutenden Kunstzentren wie Würzburg, München, Wien und Paris orientierte, suchte der Bauherr die Gleichrangigkeit mit diesen politischen Orten der Macht. Das ist wohl auch gelungen. Ein zeitgenössischer Besucher schrieb beeindruckt, es handelte sich um einen „recht königlichen Garten“."
+  },
+  {
+    "id": "poi-15",
+    "name": "Test",
+    "lat": 51.7638,
+    "lng": 8.9474,
+    "category": "Natur",
+    "tags": ["Padersee"],
+    "description": "Das ist nur ein Test."
   }
 ]
