@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Paderborn Tourist Guide</title>
+    
+    <!-- External Libraries -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+    <!-- MindAR & A-Frame for Image Tracking AR -->
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #0f172a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 430px;
+            height: 100vh;
+            max-height: 932px;
+            background: #ffffff;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        @media (min-width: 450px) {
+            .app-container {
+                height: 90vh;
+                border-radius: 36px;
+                border: 8px solid #334155;
+            }
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            background: #ffffff;
+            z-index: 1;
+        }
+
+        .screen.active {
+            display: flex;
+            z-index: 10;
+        }
+
+        /* ---------------- SPLASH SCREEN ---------------- */
+        #screen-splash {
+            background-color: #17466c;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 100;
+            opacity: 1;
+            transition: opacity 0.8s ease-in-out;
+        }
+
+        .splash-logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            animation: fadeInSplash 0.9s ease-out forwards;
+        }
+
+        @keyframes fadeInSplash {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .splash-svg-stage { width: 310px; height: auto; overflow: visible; }
+        .splash-app-title { margin-top: 18px; font-size: 21px; font-weight: 600; color: #ffffff; }
+
+        /* ---------------- AR WARNING SCREEN ---------------- */
+        #screen-ar-warning {
+            background-color: #1a4b70;
+            justify-content: space-between;
+            align-items: center;
+            padding: 70px 30px 60px 30px;
+            color: white;
+            text-align: center;
+            z-index: 90;
+        }
+
+        .ar-warning-icon-box {
+            width: 210px; height: 180px; background: #5b8db5;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            display: flex; align-items: flex-end; justify-content: center;
+            padding-bottom: 12px; margin-top: 30px;
+        }
+        .ar-warning-icon-box i { font-size: 85px; color: white; }
+        .ar-warning-text { font-size: 23px; line-height: 1.45; font-weight: 500; max-width: 310px; }
+        .ar-btn-confirm {
+            width: 100%; max-width: 320px; height: 56px; background: #ffffff;
+            color: #1a4b70; border: none; border-radius: 4px; font-size: 21px;
+            font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        }
+
+        /* ---------------- MAP VIEW & OVERLAYS ---------------- */
+        #screen-map { position: relative; width: 100%; height: 100%; }
+        #map { width: 100%; height: 100%; z-index: 1; background: #e4e8e0; }
+
+        .map-controls-left {
+            position: absolute; top: 20px; left: 15px; z-index: 500;
+            display: flex; flex-direction: column; gap: 12px;
+        }
+
+        .floating-circle-btn {
+            width: 52px; height: 52px; border-radius: 50%;
+            background: rgba(28, 73, 102, 0.95); color: #ffffff;
+            border: 2px solid rgba(255, 255, 255, 0.85);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            cursor: pointer; backdrop-filter: blur(6px);
+            transition: all 0.2s ease;
+        }
+
+        .floating-circle-btn.active {
+            background: #112838;
+            border-color: #60a5fa;
+            box-shadow: 0 0 12px rgba(96, 165, 250, 0.8);
+        }
+
+        .map-overlay-card {
+            position: absolute; top: 20px; left: 80px; right: 15px;
+            background: #1c4966; color: #ffffff; border-radius: 0px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4); z-index: 600;
+            display: none; flex-direction: column; overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .map-overlay-card.active { display: flex; }
+        .card-header-title { padding: 12px 14px 8px 14px; font-size: 15px; font-weight: 700; text-transform: uppercase; }
+        .card-search-box { margin: 0 12px 10px 12px; height: 36px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.8); display: flex; align-items: center; padding: 0 10px; gap: 8px; }
+        .card-search-box input { background: transparent; border: none; outline: none; color: #fff; width: 100%; font-size: 13px; }
+        .card-content-list { padding: 6px 14px 14px 14px; max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .checkbox-item { display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer; color: #e2e8f0; }
+        .card-footer-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: rgba(0,0,0,0.15); border-top: 1px solid rgba(255,255,255,0.1); }
+        .card-footer-icon-btn { width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid #ffffff; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #fff; cursor: pointer; }
+
+        .tour-start-container { position: absolute; bottom: 95px; left: 50%; transform: translateX(-50%); z-index: 600; display: none; align-items: center; gap: 12px; }
+        .tour-start-container.active { display: flex; }
+        .btn-tour-start { background: #1c4966; color: #ffffff; border: 1.5px solid #ffffff; padding: 12px 28px; font-size: 19px; font-weight: 600; cursor: pointer; box-shadow: 0 6px 16px rgba(0,0,0,0.4); }
+
+        /* FLOATING BOTTOM NAV BAR */
+        .floating-bottom-nav {
+            position: absolute; bottom: 20px; left: 0; width: 100%;
+            display: flex; justify-content: space-evenly; align-items: flex-end;
+            z-index: 800; padding: 0 10px; pointer-events: none; height: 70px;
+        }
+
+        .nav-circle-btn {
+            pointer-events: auto; width: 56px; height: 56px; border-radius: 50%;
+            background: rgba(28, 73, 102, 0.95); color: #ffffff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 21px; cursor: pointer; border: 2px solid rgba(255, 255, 255, 0.85);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.35); backdrop-filter: blur(6px);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.15s, box-shadow 0.15s;
+        }
+
+        .nav-circle-btn:active { transform: scale(0.92); }
+
+        .nav-circle-btn.active {
+            background: #112838;
+            border-color: #ffffff;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.5);
+            transform: translateY(-12px) scale(1.08);
+        }
+
+        /* MARKER CLUSTERING STYLING */
+        .leaflet-cluster-anim .leaflet-marker-icon, .leaflet-cluster-anim .leaflet-marker-shadow {
+            transition: transform 0.3s ease-out, opacity 0.3s ease;
+        }
+        .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large {
+            background-color: rgba(28, 73, 102, 0.6);
+        }
+        .marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div {
+            background-color: rgba(28, 73, 102, 0.95);
+            color: #ffffff;
+            font-weight: bold;
+            font-family: inherit;
+        }
+        .marker-cluster {
+            background-clip: padding-box;
+            border-radius: 20px;
+        }
+        .marker-cluster div {
+            width: 30px;
+            height: 30px;
+            margin-left: 5px;
+            margin-top: 5px;
+            text-align: center;
+            border-radius: 15px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(255, 255, 255, 0.85);
+        }
+
+        /* POI MARKERS MIT IMAGE CLIPPING */
+        .custom-poi-marker { width: 46px; height: 56px; position: relative; cursor: pointer; }
+        .marker-pin { 
+            width: 46px; height: 46px; border-radius: 50% 50% 50% 0; 
+            background: #1c4966; position: absolute; transform: rotate(-45deg); 
+            left: 0; top: 0; border: 2.5px solid #ffffff; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4); 
+            overflow: hidden; display: flex; align-items: center; justify-content: center; 
+        }
+        .marker-img-wrapper {
+            width: 100%; height: 100%; transform: rotate(45deg);
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+        .marker-img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* ---------------- POI DETAIL VIEW & SCREENSHOT MATCHING UI ---------------- */
+        #screen-detail {
+            background: #ffffff;
+        }
+
+        .detail-header { 
+            height: 56px; 
+            background: #1c4966; 
+            color: #ffffff; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 0 12px; 
+            z-index: 10; 
+        }
+        .detail-title { 
+            font-size: 15px; 
+            font-weight: 500; 
+            text-align: center; 
+            flex: 1; 
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0 10px;
+        }
+        .header-icon-btn { 
+            background: none; 
+            border: none; 
+            color: #ffffff; 
+            font-size: 20px; 
+            cursor: pointer; 
+            width: 36px; 
+            height: 36px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
+
+        .detail-sub-header-btn {
+            position: absolute;
+            top: 66px;
+            left: 14px;
+            z-index: 20;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1.5px solid #1c4966;
+            background: #ffffff;
+            color: #1c4966;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+
+        .detail-content { 
+            flex: 1; 
+            overflow-y: auto; 
+            background: #ffffff; 
+            display: flex; 
+            flex-direction: column; 
+            position: relative; 
+        }
+        .poi-hero-img { width: 100%; height: 250px; object-fit: cover; }
+        .poi-text { padding: 24px 20px; font-size: 15px; line-height: 1.6; color: #1e293b; font-weight: 400; }
+
+        /* Media Title Banner Bar */
+        .media-info-banner {
+            position: absolute;
+            bottom: 120px;
+            left: 12px;
+            right: 12px;
+            background: rgba(28, 73, 102, 0.92);
+            color: #ffffff;
+            border: 1px solid #1c4966;
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            gap: 12px;
+            z-index: 30;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        }
+        .media-info-icon {
+            font-size: 20px;
+            width: 36px;
+            height: 36px;
+            border: 1.5px solid #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .media-info-text {
+            font-size: 13.5px;
+            line-height: 1.35;
+            font-weight: 500;
+        }
+
+        /* POI 3-BUTTON BOTTOM NAVIGATION BAR */
+        .poi-bottom-nav {
+            height: 110px;
+            background: transparent;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 20px 15px 20px;
+            position: relative;
+            z-index: 50;
+        }
+
+        .poi-circle-btn {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            background: #396d93;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .poi-circle-btn.active {
+            background: #1c4966;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.4);
+        }
+
+        /* Combined Photo+Video Popup Menu */
+        .media-selector-popup {
+            position: absolute;
+            bottom: 95px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 100;
+        }
+        .media-selector-popup.active {
+            display: flex;
+        }
+
+        .media-popup-btn {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            background: #1c4966;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            border: 2px solid #ffffff;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+        }
+
+        .gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 16px; }
+        .gallery-grid img { width: 100%; height: 130px; object-fit: cover; border-radius: 8px; }
+        .video-box { width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .video-box video { width: 100%; max-height: 280px; }
+
+        #panorama-container, #canvas-3d { width: 100%; height: 100%; flex: 1; background: #0f172a; position: relative; }
+
+        /* DOWNLOAD PROGRESS BAR OVERLAY */
+        .download-progress-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(4px);
+            z-index: 3000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 30px;
+        }
+        .download-progress-overlay.active { display: flex; }
+        .download-spinner { font-size: 40px; margin-bottom: 20px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .download-bar-container { width: 100%; background: rgba(255,255,255,0.2); height: 10px; border-radius: 5px; overflow: hidden; margin: 15px 0; }
+        .download-bar-fill { height: 100%; width: 0%; background: #60a5fa; transition: width 0.2s ease; }
+
+        /* ---------------- AR GEO NAVIGATION (2. BUTTON) ---------------- */
+        #screen-ar-nav {
+            background: #000000;
+            color: #ffffff;
+            position: relative;
+            overflow: hidden;
+        }
+        #ar-nav-video {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+        #ar-nav-canvas {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 5;
+            pointer-events: none;
+        }
+        .ar-nav-compass-badge {
+            position: absolute;
+            top: 20px; right: 20px;
+            width: 48px; height: 48px;
+            background: rgba(15, 23, 42, 0.85);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 30;
+            border: 2px solid #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        .ar-nav-compass-badge i {
+            font-size: 22px;
+            color: #ef4444;
+            transition: color 0.3s ease;
+        }
+        .ar-nav-compass-badge.active i {
+            color: #22c55e;
+        }
+        .ar-nav-info-banner {
+            position: absolute;
+            top: 25px; left: 20px;
+            background: rgba(28, 73, 102, 0.9);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13.5px;
+            font-weight: 500;
+            z-index: 30;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* ---------------- AR MARKER SCANNER ---------------- */
+        #screen-ar-marker {
+            background: #000000;
+            color: #ffffff;
+            position: relative;
+            overflow: hidden;
+        }
+        .ar-top-banner {
+            position: absolute;
+            top: 0; left: 0; width: 100%;
+            background: rgba(28, 73, 102, 0.9);
+            color: #ffffff;
+            text-align: center;
+            padding: 14px 16px;
+            font-size: 15px; font-weight: 500;
+            z-index: 30;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            line-height: 1.35;
+        }
+        #ar-scene-container {
+            width: 100%; height: 100%;
+            position: absolute; top: 0; left: 0;
+            z-index: 5;
+        }
+
+        /* ---------------- QR CODE KAMERA ---------------- */
+        #screen-qr { background: #111111; color: #ffffff; position: relative; overflow: hidden; }
+        .qr-top-banner { position: absolute; top: 0; left: 0; width: 100%; background: #ffffff; color: #1e4566; text-align: center; padding: 14px 16px; font-size: 15px; font-weight: 500; z-index: 30; box-shadow: 0 2px 10px rgba(0,0,0,0.3); line-height: 1.35; }
+        #qr-reader-fullscreen { width: 100%; height: 100%; position: absolute; top: 0; left: 0; object-fit: cover; z-index: 5; }
+        #qr-reader-fullscreen video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
+        .qr-viewfinder-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 15; pointer-events: none; display: flex; align-items: center; justify-content: center; }
+        .qr-finder-box { width: 270px; height: 270px; position: relative; }
+        .qr-corner { position: absolute; width: 60px; height: 60px; border-color: #ffffff; border-style: solid; }
+        .corner-top-left { top: 0; left: 0; border-width: 2.5px 0 0 2.5px; }
+        .corner-top-right { top: 0; right: 0; border-width: 2.5px 2.5px 0 0; }
+        .corner-bottom-left { bottom: 0; left: 0; border-width: 0 0 2.5px 2.5px; }
+        .corner-bottom-right { bottom: 0; right: 0; border-width: 0 2.5px 2.5px 0; }
+
+        /* ---------------- SETTINGS VIEW ---------------- */
+        #screen-settings { background-color: #ffffff; }
+        .settings-header-title { text-align: center; font-size: 28px; font-weight: 600; color: #1e4566; margin-top: 35px; margin-bottom: 25px; letter-spacing: 1px; text-transform: uppercase; }
+        .settings-scroll-area { flex: 1; overflow-y: auto; padding: 0 24px 100px 24px; }
+        .settings-group-title { font-size: 17px; font-weight: 700; color: #1e4566; margin-top: 25px; margin-bottom: 12px; text-transform: uppercase; }
+        .settings-item { margin-bottom: 18px; }
+        .settings-item-title { font-size: 17px; font-weight: 700; color: #1e4566; margin-bottom: 4px; }
+        .settings-item-desc { font-size: 13px; color: #2c4c66; line-height: 1.4; margin-bottom: 10px; }
+        .settings-select-box { width: 100%; height: 42px; border: 1px solid #1e4566; background: #ffffff; color: #1e4566; font-size: 16px; padding: 0 12px; outline: none; border-radius: 0; }
+        .slider-wrapper { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+        .slider-val-label { font-size: 11px; color: #1e4566; font-weight: 600; }
+        .settings-slider { flex: 1; -webkit-appearance: none; height: 4px; background: #1e4566; outline: none; border-radius: 2px; }
+        .settings-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: #1e4566; cursor: pointer; }
+        .storage-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+        .storage-info-title { font-size: 17px; font-weight: 700; color: #1e4566; }
+        .storage-info-size { font-size: 13px; color: #2c4c66; margin-top: 2px; }
+        .storage-trash-btn { background: none; border: none; color: #1e4566; font-size: 24px; cursor: pointer; }
+        .action-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+        .action-title { font-size: 17px; font-weight: 700; color: #1e4566; }
+        .settings-action-btn { background: #1b476b; color: #ffffff; border: none; padding: 8px 22px; font-size: 14px; font-weight: 500; cursor: pointer; }
+
+        /* MODAL OVERLAY */
+        .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.active { display: flex; }
+        .modal-card { background: #ffffff; border-radius: 18px; width: 100%; max-width: 340px; padding: 22px; display: flex; flex-direction: column; gap: 14px; text-align: center; }
+        .modal-icon { width: 56px; height: 56px; background: #dbeafe; color: #1c4966; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; margin: 0 auto; }
+        .modal-title { font-size: 17px; font-weight: 700; color: #0f172a; }
+        .modal-text { font-size: 13px; color: #475569; word-break: break-all; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; max-height: 100px; overflow-y: auto; }
+        .modal-actions { display: flex; flex-direction: column; gap: 8px; }
+        .qr-btn { width: 100%; padding: 12px; border-radius: 10px; border: none; background: #1c4966; color: #ffffff; font-weight: 600; font-size: 13.5px; cursor: pointer; }
+        .qr-btn-secondary { background: #334155; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+
+    <!-- DOWNLOAD PROGRESS OVERLAY -->
+    <div class="download-progress-overlay" id="download-overlay">
+        <i class="fa-solid fa-spinner download-spinner"></i>
+        <div style="font-size: 18px; font-weight: 600;">Inhalte werden heruntergeladen...</div>
+        <div class="download-bar-container">
+            <div class="download-bar-fill" id="download-bar-fill"></div>
+        </div>
+        <div id="download-status-text" style="font-size: 13px; opacity: 0.8;">0 / 0 Dateien</div>
+    </div>
+
+    <!-- SPLASH SCREEN -->
+    <div id="screen-splash" class="screen active">
+        <div class="splash-logo-container">
+            <svg class="splash-svg-stage" viewBox="0 0 320 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="160" cy="225" rx="105" ry="22" stroke="white" stroke-width="2.5" stroke-dasharray="8 6" opacity="0.85"/>
+                <g transform="translate(58, 178)">
+                    <path d="M16 0 C7.16 0 0 7.16 0 16 C0 27 16 42 16 42 C16 42 32 27 32 16 C32 7.16 24.84 0 16 0 Z" fill="none" stroke="white" stroke-width="2.5"/>
+                    <text x="16" y="22" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle">i</text>
+                </g>
+                <g transform="translate(225, 162)">
+                    <path d="M22 0 C9.85 0 0 9.85 0 22 C0 37 22 58 22 58 C22 58 44 37 44 22 C44 9.85 34.15 0 22 0 Z" fill="none" stroke="white" stroke-width="2.5"/>
+                    <path d="M12 28 L18 18 L22 23 L26 18 L32 28 Z" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 13 L14 13 M9 13 L9 18" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+                    <path d="M35 13 L30 13 M35 13 L35 18" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+                    <path d="M9 31 L14 31 M9 31 L9 26" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+                    <path d="M35 31 L30 31 M35 31 L35 26" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+                </g>
+                <g transform="translate(98, 18)">
+                    <path d="M62 0 C27.75 0 0 27.75 0 62 C0 105.4 62 165 62 165 C62 165 124 105.4 124 62 C124 27.75 96.25 0 62 0 Z" fill="#dce4ec"/>
+                    <g transform="translate(18, 14)">
+                        <text x="-48" y="10" fill="#e03e25" font-family="Arial, sans-serif" font-size="12" font-weight="bold" transform="rotate(-90)">paderborn.de</text>
+                        <path d="M22 6 Q50 4 78 5 Q82 18 79 32 Q52 30 23 33 Z" fill="#0052cc"/>
+                        <path d="M22 34 Q50 32 79 34 Q82 58 82 72 Q50 75 22 72 Z" fill="#f5bc00"/>
+                        <path d="M22 6 Q58 6 62 26 Q64 48 38 48 L38 72 L22 72 Z M38 20 L38 34 Q48 34 46 27 Q44 20 38 20 Z" fill="#ffffff"/>
+                        <path d="M30 38 C28 26 36 18 42 18 C43 28 35 38 30 38 Z" fill="#e03e25"/>
+                        <text x="48" y="93" fill="#0052cc" font-family="Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Paderborn</text>
+                        <text x="48" y="108" fill="#0052cc" font-family="Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle">überzeugt.</text>
+                    </g>
+                </g>
+            </svg>
+            <div class="splash-app-title">Paderborn To Go</div>
+        </div>
+    </div>
+
+    <!-- AR WARNING SCREEN -->
+    <div id="screen-ar-warning" class="screen">
+        <div class="ar-warning-icon-box"><i class="fa-solid fa-person-walking"></i></div>
+        <div class="ar-warning-text">Achte beim Benutzen der AR- Funktionen auf deine Umgebung!</div>
+        <button class="ar-btn-confirm" onclick="confirmArWarning()">Bestätigen</button>
+    </div>
+
+    <!-- MAP VIEW -->
+    <div id="screen-map" class="screen">
+        <div class="map-controls-left">
+            <div class="floating-circle-btn" id="btn-top-tour" title="Touren" onclick="toggleOverlay('overlay-tours')"><i class="fa-solid fa-route"></i></div>
+            <div class="floating-circle-btn" id="btn-top-tags" title="Tags" onclick="toggleOverlay('overlay-tags')"><i class="fa-solid fa-tag"></i></div>
+            <div class="floating-circle-btn" id="btn-top-categories" title="Kategorien" onclick="toggleOverlay('overlay-categories')"><i class="fa-solid fa-layer-group"></i></div>
+            <div class="floating-circle-btn" title="Standort" onclick="centerLocation()"><i class="fa-solid fa-location-crosshairs"></i></div>
+        </div>
+
+        <div class="map-overlay-card" id="overlay-tours">
+            <div class="card-header-title">TOUREN IN DER NÄHE</div>
+            <div class="card-search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Tour suchen..."><i class="fa-solid fa-play" style="font-size:10px;"></i></div>
+            <div class="card-content-list"><label class="checkbox-item"><input type="checkbox" id="chk-paderroute"> Paderroute (Wanderroute)</label></div>
+            <div class="card-footer-bar"><i class="fa-solid fa-caret-down" style="font-size:20px; cursor:pointer;" onclick="toggleOverlay('overlay-tours')"></i><div class="card-footer-icon-btn"><i class="fa-solid fa-book-open"></i></div></div>
+        </div>
+
+        <div class="map-overlay-card" id="overlay-tags">
+            <div class="card-header-title">TAGS</div>
+            <div class="card-search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Tags suchen..." oninput="filterTagsList(this.value)"><i class="fa-solid fa-play" style="font-size:10px;"></i></div>
+            <div class="card-content-list" id="tags-list-items">
+                <label class="checkbox-item"><input type="checkbox" value="Quellgebiet" onchange="applyTagFilters()"> Quellgebiet</label>
+                <label class="checkbox-item"><input type="checkbox" value="Kaiserpfalz" onchange="applyTagFilters()"> Kaiserpfalz</label>
+                <label class="checkbox-item"><input type="checkbox" value="Hanse" onchange="applyTagFilters()"> Hanse</label>
+                <label class="checkbox-item"><input type="checkbox" value="Trinkwasser" onchange="applyTagFilters()"> Trinkwasser</label>
+                <label class="checkbox-item"><input type="checkbox" value="Mühle" onchange="applyTagFilters()"> Mühle</label>
+                <label class="checkbox-item"><input type="checkbox" value="Hochwasserschutz" onchange="applyTagFilters()"> Hochwasserschutz</label>
+            </div>
+            <div class="card-footer-bar" style="justify-content: flex-end;">
+                <div class="card-footer-icon-btn" onclick="startOfflineDownload('tags')" title="Inhalte der ausgewählten Tags offline herunterladen">
+                    <i class="fa-solid fa-download"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="map-overlay-card" id="overlay-categories">
+            <div class="card-header-title">KATEGORIEN</div>
+            <div class="card-search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Kategorien suchen..." oninput="filterCategoryList(this.value)"><i class="fa-solid fa-play" style="font-size:10px;"></i></div>
+            <div class="card-content-list" id="categories-list-items">
+                <label class="checkbox-item"><input type="checkbox" value="Natur" checked onchange="applyCategoryFilters()"> Natur</label>
+                <label class="checkbox-item"><input type="checkbox" value="Historisch" checked onchange="applyCategoryFilters()"> Historisch</label>
+                <label class="checkbox-item"><input type="checkbox" value="Technik" checked onchange="applyCategoryFilters()"> Technik</label>
+                <label class="checkbox-item"><input type="checkbox" value="Kultur" checked onchange="applyCategoryFilters()"> Kultur</label>
+                <label class="checkbox-item"><input type="checkbox" value="Gesundheit" checked onchange="applyCategoryFilters()"> Gesundheit</label>
+            </div>
+            <div class="card-footer-bar" style="justify-content: flex-end;">
+                <div class="card-footer-icon-btn" onclick="startOfflineDownload('categories')" title="Inhalte der ausgewählten Kategorien offline herunterladen">
+                    <i class="fa-solid fa-download"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="tour-start-container" id="tour-start-bar">
+            <button class="btn-tour-start" onclick="startActiveTour()">Tour starten</button>
+            <div class="card-footer-icon-btn" style="width:48px; height:48px; background:#1c4966; font-size:20px;" onclick="startOfflineDownload('tour')"><i class="fa-solid fa-download"></i></div>
+        </div>
+
+        <div id="map"></div>
+
+        <div class="floating-bottom-nav">
+            <div class="nav-circle-btn active" onclick="switchNavTab(0, 'screen-map')"><i class="fa-solid fa-map-location-dot"></i></div>
+            <div class="nav-circle-btn" onclick="switchNavTab(1, 'screen-ar-nav')"><i class="fa-solid fa-camera-retro"></i></div>
+            <div class="nav-circle-btn" onclick="switchNavTab(2, 'screen-ar-marker')"><i class="fa-solid fa-book"></i></div>
+            <div class="nav-circle-btn" onclick="switchNavTab(3, 'screen-qr')"><i class="fa-solid fa-qrcode"></i></div>
+            <div class="nav-circle-btn" onclick="switchNavTab(4, 'screen-settings')"><i class="fa-solid fa-gear"></i></div>
+        </div>
+    </div>
+
+    <!-- POI DETAIL VIEW -->
+    <div id="screen-detail" class="screen">
+        <div class="detail-header">
+            <button class="header-icon-btn" onclick="switchScreen('screen-map')"><i class="fa-solid fa-caret-left" style="font-size:24px;"></i></button>
+            <div class="detail-title" id="detail-title-text">POI Title | 5808893m</div>
+            <button class="header-icon-btn" onclick="toggleFavorite()"><i class="fa-regular fa-heart" id="fav-icon"></i></button>
+        </div>
+
+        <div class="detail-sub-header-btn" title="Lerntext / Buch" onclick="switchPoiMediaTab('home')">
+            <i class="fa-solid fa-book-open"></i>
+        </div>
+        
+        <div class="detail-content" id="detail-content-area"></div>
+
+        <!-- Dynamic In-Media Banner -->
+        <div class="media-info-banner" id="media-info-banner" style="display: none;">
+            <div class="media-info-icon" id="media-banner-icon"><i class="fa-solid fa-cube"></i></div>
+            <div class="media-info-text" id="media-banner-text">3D Rekonstruktionsmodell</div>
+        </div>
+
+        <!-- Merged Media Selection Popup -->
+        <div class="media-selector-popup" id="media-selector-popup">
+            <button class="media-popup-btn" onclick="selectMergedMedia('video')" title="Video abspielen"><i class="fa-solid fa-film"></i></button>
+            <button class="media-popup-btn" onclick="selectMergedMedia('photo')" title="Fotos anzeigen"><i class="fa-solid fa-camera"></i></button>
+        </div>
+
+        <!-- 3-BUTTON BOTTOM NAVIGATION BAR -->
+        <div class="poi-bottom-nav">
+            <button class="poi-circle-btn active" id="poi-btn-1" onclick="switchPoiMediaTab('home')">
+                <i class="fa-solid fa-house"></i>
+            </button>
+            <button class="poi-circle-btn" id="poi-btn-2" onclick="handlePoiBtn2Click()">
+                <i class="fa-solid fa-camera" id="poi-btn-2-icon"></i>
+            </button>
+            <button class="poi-circle-btn" id="poi-btn-3" onclick="handlePoiBtn3Click()">
+                <i class="fa-solid fa-cube" id="poi-btn-3-icon"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- AR GEO NAVIGATION SCREEN (2. BUTTON) -->
+    <div id="screen-ar-nav" class="screen">
+        <div class="ar-nav-info-banner" id="ar-nav-info">Warte auf GPS-Standort...</div>
+        <div class="ar-nav-compass-badge" id="ar-compass-badge" title="Kompass & Standort Status">
+            <i class="fa-solid fa-compass" id="ar-compass-icon"></i>
+        </div>
+
+        <video id="ar-nav-video" autoplay playsinline muted></video>
+        <div id="ar-nav-canvas"></div>
+
+        <div class="floating-bottom-nav">
+            <div class="nav-circle-btn" onclick="switchNavTab(0, 'screen-map')"><i class="fa-solid fa-map-location-dot"></i></div>
+            <div class="nav-circle-btn active" onclick="switchNavTab(1, 'screen-ar-nav')"><i class="fa-solid fa-camera-retro"></i></div>
+            <div class="nav-circle-btn" onclick="switchNavTab(2, 'screen-ar-marker')"><i class="fa-solid fa-book"></i></div>
+            <div class="nav-circle-btn" onclick="switchNavTab(3, 'screen-qr')"><i class="fa-solid fa-qrcode"></i></div>
+            <div class="nav-circle-btn" onclick="switchNavTab(4, 'screen-settings')"><i class="fa-solid fa-gear"></i></div>
+        </div>
+    </div>
+
+    <!-- AR MARKER SCANNER SCREEN -->
+    <div id="screen-ar-marker" class="screen">
+        <div class="ar-top-banner">
+            Richten Sie die Kamera auf einen gedruckten AR-Marker!
+        </div>
+
+        <div id="ar-scene-container"></div>
+
+        <div class="floating-bottom-nav">
+            <div class="nav-circle-btn" onclick="switchNavTab(0, 'screen-map')"><i class="fa-solid fa-map-location-dot"></i></div>
+            <div class="nav-circle-btn" onclick="switchNavTab(1, 'screen-ar-nav')"><i class="fa-solid fa-camera-retro"></i></div>
+            <div class="nav-circle-btn active" onclick="switchNavTab(2, 'screen-ar-marker')"><i class="fa-solid fa-book"></i></div>
+            <div class="nav-circle-btn" onclick="switchNavTab(3, 'screen-qr')"><i class="fa-solid fa-qrcode"></i></div>
+            <div class="nav-circle-btn" onclick="switchNavTab(4, 'screen-settings')"><i class="fa-solid fa-gear"></i></div>
+        </div>
+    </div>
+
+    <!-- QR SCANNER -->
+    <div id="screen-qr" class="screen">
+        <div class="qr-top-banner">
+            Bitte richten Sie die Kamera Ihres Gerätes<br>auf einen QR Code!
+        </div>
+
+        <div id="qr-reader-fullscreen"></div>
+
+        <div class="qr-viewfinder-overlay">
+            <div class="qr-finder-box">
+                <div class="qr-corner corner-top-left"></div>
+                <div class="qr-corner corner-top-right"></div>
+                <div class="qr-corner corner-bottom-left"></div>
+                <div class="qr-corner corner-bottom-right"></div>
+            </div>
+        </div>
+
+        <div class="floating-bottom-nav">
+            <div class="nav-circle-btn" onclick="switchNavTab(0, 'screen-map')"><i class="fa-solid fa-map-location-dot"></i></div>
+            <div class="nav-circle-btn" onclick="switchNavTab(1, 'screen-ar-nav')"><i class="fa-solid fa-camera-retro"></i></div>
+            <div class="nav-circle-btn" onclick="switchNavTab(2, 'screen-ar-marker')"><i class="fa-solid fa-book"></i></div>
+            <div class="nav-circle-btn active" onclick="switchNavTab(3, 'screen-qr')"><i class="fa-solid fa-qrcode"></i></div>
+            <div class="nav-circle-btn" onclick="switchNavTab(4, 'screen-settings')"><i class="fa-solid fa-gear"></i></div>
+        </div>
+    </div>
+
+    <!-- SETTINGS SCREEN -->
+    <div id="screen-settings" class="screen">
+        <div class="settings-header-title">EINSTELLUNGEN</div>
+        
+        <div class="settings-scroll-area">
+            <div class="settings-group-title">SPRACHEINSTELLUNGEN</div>
+            <div class="settings-item">
+                <div class="settings-item-title">Sprache</div>
+                <div class="settings-item-desc">Hier kann die Sprache der Applikation ausgewählt werden.</div>
+                <select class="settings-select-box" onchange="showToast('Sprache geändert')">
+                    <option value="de">Deutsch</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
+
+            <div class="settings-group-title">AR EINSTELLUNGEN</div>
+            <div class="settings-item">
+                <div class="settings-item-title">Render Distanz</div>
+                <div class="settings-item-desc">Hier kann die Entfernung eingestellt werden am welcher POIs in AR nicht mehr angezeigt werden.</div>
+                <div class="slider-wrapper">
+                    <span class="slider-val-label">100</span>
+                    <input type="range" min="100" max="1000" value="500" class="settings-slider" id="render-dist-slider" oninput="updateRenderDist(this.value)">
+                    <span class="slider-val-label" id="render-dist-val">1000</span>
+                </div>
+            </div>
+
+            <div class="settings-group-title">SPEICHER EINSTELLUNGEN</div>
+            <div class="storage-row">
+                <div><div class="storage-info-title">Dateien</div><div class="storage-info-size" id="size-files">0B</div></div>
+                <button class="storage-trash-btn" onclick="deleteStorageCategory('files')"><i class="fa-solid fa-trash-can"></i></button>
+            </div>
+            <div class="storage-row">
+                <div><div class="storage-info-title">Bilder</div><div class="storage-info-size" id="size-images">0B</div></div>
+                <button class="storage-trash-btn" onclick="deleteStorageCategory('images')"><i class="fa-solid fa-trash-can"></i></button>
+            </div>
+            <div class="storage-row">
+                <div><div class="storage-info-title">Audio</div><div class="storage-info-size" id="size-audio">0B</div></div>
+                <button class="storage-trash-btn" onclick="deleteStorageCategory('audio')"><i class="fa-solid fa-trash-can"></i></button>
+            </div>
+            <div class="storage-row">
+                <div><div class="storage-info-title">Videos</div><div class="storage-info-size" id="size-videos">0B</div></div>
+                <button class="storage-trash-btn" onclick="deleteStorageCategory('videos')"><i class="fa-solid fa-trash-can"></i></button>
+            </div>
+            <div class="storage-row">
+                <div><div class="storage-info-title">3D Modelle</div><div class="storage-info-size" id="size-models">0B</div></div>
+                <button class="storage-trash-btn" onclick="deleteStorageCategory('models')"><i class="fa-solid fa-trash-can"></i></button>
+            </div>
+
+            <div class="settings-group-title">DATENSCHUTZ</div>
+            <div class="action-row"><div class="action-title">Datenschutz</div><button class="settings-action-btn" onclick="showToast('Datenschutz geöffnet')">Anzeigen</button></div>
+            <div class="action-row"><div class="action-title">Impressum</div><button class="settings-action-btn" onclick="showToast('Impressum geöffnet')">Anzeigen</button></div>
+
+            <div class="settings-group-title">SONSTIGE</div>
+            <div class="action-row"><div class="action-title">Tutorien</div><button class="settings-action-btn" onclick="showToast('Tutorium wird neu gestartet...')">Erneut Anzeigen</button></div>
+        </div>
+
+        <div class="floating-bottom-nav">
+            <div class="nav-circle-btn" onclick="switchNavTab(0, 'screen-map')"><i class="fa-solid fa-map-location-dot"></i></div>
+            <div class="nav-circle-btn" onclick="switchNavTab(1, 'screen-ar-nav')"><i class="fa-solid fa-camera-retro"></i></div>
+            <div class="nav-circle-btn" onclick="switchNavTab(2, 'screen-ar-marker')"><i class="fa-solid fa-book"></i></div>
+            <div class="nav-circle-btn" onclick="switchNavTab(3, 'screen-qr')"><i class="fa-solid fa-qrcode"></i></div>
+            <div class="nav-circle-btn active" onclick="switchNavTab(4, 'screen-settings')"><i class="fa-solid fa-gear"></i></div>
+        </div>
+    </div>
+
+    <!-- MODAL POPUP -->
+    <div class="modal-overlay" id="qr-modal">
+        <div class="modal-card">
+            <div class="modal-icon"><i class="fa-solid fa-qrcode"></i></div>
+            <div class="modal-title">QR-Code Erkannt!</div>
+            <div class="modal-text" id="qr-result-text">https://example.com</div>
+            <div class="modal-actions">
+                <button class="qr-btn" id="qr-action-btn" onclick="handleQrAction()"><i class="fa-solid fa-up-right-from-square"></i> Link Öffnen</button>
+                <button class="qr-btn qr-btn-secondary" onclick="closeQrModal()">Schließen</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let pois = [];
+    let currentPoi = null;
+    let currentDetailMode = 'home';
+    let map = null, markersClusterGroup = null, markersMap = {};
+    let activeRoutePolyline = null;
+    let threeRenderer = null, threeAnimFrame = null;
+    let html5QrCode = null;
+    let isQrScanning = false;
+    let isArScanning = false;
+    let isArNavActive = false;
+    let currentScannedResult = "";
+
+    // AR Nav State (Echtes Geo-Tracking ohne Fallback)
+    let userLat = null, userLng = null;
+    let userHeading = 0;
+    let arNavThreeRenderer = null, arNavScene = null, arNavCamera = null, arNavAnimFrame = null;
+    let arNavArrowMesh = null;
+    let arNavStream = null;
+    let arPoiMeshes = [];
+
+    const GITHUB_REPO_BASE = "https://raw.githubusercontent.com/taichach/paderborn-to-go/main/";
+    const CACHE_NAME = "paderborn-offline-v1";
+
+    let storageSizes = { files: 0, images: 0, audio: 0, videos: 0, models: 0 };
+
+    function loadSavedStorageSizes() {
+        const saved = localStorage.getItem("paderborn_storage_sizes");
+        if (saved) { try { storageSizes = JSON.parse(saved); } catch(e) {} }
+        updateStorageUI();
+    }
+
+    function saveStorageSizes() {
+        localStorage.setItem("paderborn_storage_sizes", JSON.stringify(storageSizes));
+        updateStorageUI();
+    }
+
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + sizes[i];
+    }
+
+    function updateStorageUI() {
+        document.getElementById('size-files').innerText = formatBytes(storageSizes.files);
+        document.getElementById('size-images').innerText = formatBytes(storageSizes.images);
+        document.getElementById('size-audio').innerText = formatBytes(storageSizes.audio);
+        document.getElementById('size-videos').innerText = formatBytes(storageSizes.videos);
+        document.getElementById('size-models').innerText = formatBytes(storageSizes.models);
+    }
+
+    async function deleteStorageCategory(category) {
+        if ('caches' in window) {
+            const cache = await caches.open(CACHE_NAME);
+            const keys = await cache.keys();
+            for (const request of keys) {
+                const url = request.url.toLowerCase();
+                let shouldDelete = false;
+                if (category === 'files' && (url.endsWith('.json') || url.endsWith('.txt') || url.endsWith('.html'))) shouldDelete = true;
+                if (category === 'images' && (url.endsWith('.jpg') || url.endsWith('.png') || url.endsWith('.jpeg') || url.endsWith('.webp'))) shouldDelete = true;
+                if (category === 'audio' && (url.endsWith('.mp3') || url.endsWith('.wav') || url.endsWith('.ogg'))) shouldDelete = true;
+                if (category === 'videos' && (url.endsWith('.mp4') || url.endsWith('.webm'))) shouldDelete = true;
+                if (category === 'models' && (url.endsWith('.gltf') || url.endsWith('.glb') || url.endsWith('.bin'))) shouldDelete = true;
+                if (shouldDelete) { await cache.delete(request); }
+            }
+        }
+        storageSizes[category] = 0;
+        saveStorageSizes();
+        showToast("Speicher für " + category + " geleert!");
+    }
+
+    async function startOfflineDownload(sourceType) {
+        let selectedPois = [];
+        if (sourceType === 'tags') {
+            const checkedTags = Array.from(document.querySelectorAll('#tags-list-items input[type="checkbox"]:checked')).map(cb => cb.value);
+            if (checkedTags.length === 0) { showToast("Bitte wähle mindestens einen Tag aus!"); return; }
+            selectedPois = pois.filter(p => p.tags.some(t => checkedTags.includes(t)));
+        } else if (sourceType === 'categories') {
+            const checkedCats = Array.from(document.querySelectorAll('#categories-list-items input[type="checkbox"]:checked')).map(cb => cb.value);
+            if (checkedCats.length === 0) { showToast("Bitte wähle mindestens eine Kategorie aus!"); return; }
+            selectedPois = pois.filter(p => checkedCats.includes(p.category));
+        } else {
+            selectedPois = pois;
+        }
+
+        if (selectedPois.length === 0) { showToast("Keine POIs zum Herunterladen gefunden."); return; }
+
+        const overlay = document.getElementById('download-overlay');
+        const fillBar = document.getElementById('download-bar-fill');
+        const statusText = document.getElementById('download-status-text');
+        overlay.classList.add('active');
+
+        let urlsToDownload = [GITHUB_REPO_BASE + 'data/pois.json'];
+        selectedPois.forEach(poi => {
+            if (poi.image) urlsToDownload.push(poi.image);
+            if (poi.gallery) poi.gallery.forEach(g => urlsToDownload.push(g));
+            if (poi.panoImage) urlsToDownload.push(poi.panoImage);
+        });
+        urlsToDownload = [...new Set(urlsToDownload)];
+
+        let downloadedCount = 0;
+        const totalCount = urlsToDownload.length;
+
+        if ('caches' in window) {
+            const cache = await caches.open(CACHE_NAME);
+            for (let i = 0; i < totalCount; i++) {
+                const url = urlsToDownload[i];
+                try {
+                    const response = await fetch(url);
+                    if (response.ok) {
+                        await cache.put(url, response.clone());
+                        const blob = await response.blob();
+                        const size = blob.size;
+                        const lower = url.toLowerCase();
+                        if (lower.endsWith('.jpg') || lower.endsWith('.png') || lower.endsWith('.jpeg')) storageSizes.images += size;
+                        else if (lower.endsWith('.mp4')) storageSizes.videos += size;
+                        else if (lower.endsWith('.mp3')) storageSizes.audio += size;
+                        else storageSizes.files += size;
+                    }
+                } catch (e) {}
+                downloadedCount++;
+                const percent = Math.round((downloadedCount / totalCount) * 100);
+                fillBar.style.width = percent + "%";
+                statusText.innerText = `${downloadedCount} / ${totalCount} Dateien (${percent}%)`;
+            }
+        }
+
+        saveStorageSizes();
+        setTimeout(() => {
+            overlay.classList.remove('active');
+            showToast(`${selectedPois.length} POIs erfolgreich offline gespeichert!`);
+            toggleOverlay('');
+        }, 500);
+    }
+
+    async function loadBackendData() {
+        const jsonUrl = GITHUB_REPO_BASE + 'data/pois.json';
+        try {
+            let response;
+            if ('caches' in window) {
+                const cache = await caches.open(CACHE_NAME);
+                const cachedRes = await cache.match(jsonUrl);
+                if (cachedRes) response = cachedRes;
+                else { response = await fetch(jsonUrl); cache.put(jsonUrl, response.clone()); }
+            } else {
+                response = await fetch(jsonUrl);
+            }
+            const rawData = await response.json();
+            pois = rawData.map(poi => ({
+                ...poi,
+                image: GITHUB_REPO_BASE + 'assets/images/' + poi.id + '.jpg',
+                gallery: [GITHUB_REPO_BASE + 'assets/images/' + poi.id + '.jpg'],
+                hasVideo: poi.id === 'poi-1' || poi.id === 'poi-4',
+                hasPhoto: true,
+                has360: poi.id === 'poi-1' || poi.id === 'poi-2',
+                has3D: poi.id === 'poi-3' || poi.id === 'poi-7',
+                panoImage: "https://pannellum.org/images/alma.jpg",
+                videoTitle: poi.name + " Dokumentation",
+                panoTitle: "360° Foto des " + poi.name,
+                modelTitle: "3D Rekonstruktionsmodell " + poi.name
+            }));
+            if (pois.length > 0) currentPoi = pois[0];
+            showToast("Backend-Daten geladen!");
+        } catch (error) {
+            showToast("Fehler beim Laden des Backends!");
+        }
+    }
+
+    async function startAppFlow() {
+        loadSavedStorageSizes();
+        await loadBackendData();
+        initMap();
+        setTimeout(() => {
+            const splash = document.getElementById('screen-splash');
+            splash.style.opacity = '0';
+            setTimeout(() => {
+                splash.classList.remove('active');
+                document.getElementById('screen-ar-warning').classList.add('active');
+            }, 800);
+        }, 2500);
+    }
+
+    function confirmArWarning() {
+        document.getElementById('screen-ar-warning').classList.remove('active');
+        switchNavTab(0, 'screen-map');
+    }
+
+    function initMap() {
+        if (map) { map.invalidateSize(); return; }
+        map = L.map('map', { zoomControl: false }).setView([51.7195, 8.7555], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="https://www.openstreetmap.de/">OSM Deutschland</a>'
+        }).addTo(map);
+
+        markersClusterGroup = L.markerClusterGroup({ spiderfyOnMaxZoom: true, showCoverageOnHover: false, zoomToBoundsOnClick: true });
+
+        pois.forEach(poi => {
+            const customIcon = L.divIcon({
+                className: 'custom-poi-marker',
+                html: `<div class="marker-pin"><div class="marker-img-wrapper"><img src="${poi.image}" class="marker-img" onerror="this.src='https://placehold.co/100x100?text=POI'"></div></div>`,
+                iconSize: [46, 56],
+                iconAnchor: [23, 56]
+            });
+            const marker = L.marker([poi.lat, poi.lng], { icon: customIcon });
+            marker.on('click', () => openPoiDetail(poi));
+            markersMap[poi.id] = { marker: marker, poi: poi };
+            markersClusterGroup.addLayer(marker);
+        });
+        map.addLayer(markersClusterGroup);
+    }
+
+    function switchNavTab(buttonIndex, screenId) {
+        document.querySelectorAll('.floating-bottom-nav').forEach(nav => {
+            const buttons = nav.querySelectorAll('.nav-circle-btn');
+            buttons.forEach((btn, idx) => {
+                if (idx === buttonIndex) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+        });
+        switchScreen(screenId);
+    }
+
+    function toggleOverlay(overlayId) {
+        const overlay = overlayId ? document.getElementById(overlayId) : null;
+        const isActive = overlay ? overlay.classList.contains('active') : false;
+        document.querySelectorAll('.map-overlay-card').forEach(o => o.classList.remove('active'));
+        document.querySelectorAll('.map-controls-left .floating-circle-btn').forEach(b => {
+            if (b.id !== 'btn-top-tour' && b.id !== 'btn-top-tags' && b.id !== 'btn-top-categories') return;
+            b.classList.remove('active');
+        });
+        document.getElementById('tour-start-bar').classList.remove('active');
+
+        if (!isActive && overlay) {
+            overlay.classList.add('active');
+            if (overlayId === 'overlay-tours') {
+                document.getElementById('btn-top-tour').classList.add('active');
+                document.getElementById('tour-start-bar').classList.add('active');
+            } else if (overlayId === 'overlay-tags') {
+                document.getElementById('btn-top-tags').classList.add('active');
+            } else if (overlayId === 'overlay-categories') {
+                document.getElementById('btn-top-categories').classList.add('active');
+            }
+        }
+    }
+
+    function startActiveTour() {
+        const isPaderrouteChecked = document.getElementById('chk-paderroute').checked;
+        toggleOverlay('');
+        if (activeRoutePolyline) { map.removeLayer(activeRoutePolyline); activeRoutePolyline = null; }
+        if (isPaderrouteChecked) {
+            const hikingRouteCoords = pois.map(p => [p.lat, p.lng]);
+            activeRoutePolyline = L.polyline(hikingRouteCoords, { color: '#ef4444', weight: 5, opacity: 0.85, dashArray: '8, 8' }).addTo(map);
+            map.fitBounds(activeRoutePolyline.getBounds(), { padding: [50, 50] });
+            showToast("Paderroute (Wanderweg) gestartet!");
+        } else {
+            showToast("Bitte wähle eine Tour aus.");
+        }
+    }
+
+    function applyTagFilters() {
+        const checkedTags = Array.from(document.querySelectorAll('#tags-list-items input[type="checkbox"]:checked')).map(cb => cb.value);
+        markersClusterGroup.clearLayers();
+        Object.values(markersMap).forEach(item => {
+            const matches = checkedTags.length === 0 || item.poi.tags.some(t => checkedTags.includes(t));
+            if (matches) markersClusterGroup.addLayer(item.marker);
+        });
+    }
+
+    function applyCategoryFilters() {
+        const checkedCats = Array.from(document.querySelectorAll('#categories-list-items input[type="checkbox"]:checked')).map(cb => cb.value);
+        markersClusterGroup.clearLayers();
+        Object.values(markersMap).forEach(item => {
+            const matches = checkedCats.length === 0 || checkedCats.includes(item.poi.category);
+            if (matches) markersClusterGroup.addLayer(item.marker);
+        });
+    }
+
+    function filterTagsList(query) {
+        const q = query.toLowerCase();
+        document.querySelectorAll('#tags-list-items .checkbox-item').forEach(el => {
+            el.style.display = el.innerText.toLowerCase().includes(q) ? 'flex' : 'none';
+        });
+    }
+
+    function filterCategoryList(query) {
+        const q = query.toLowerCase();
+        document.querySelectorAll('#categories-list-items .checkbox-item').forEach(el => {
+            el.style.display = el.innerText.toLowerCase().includes(q) ? 'flex' : 'none';
+        });
+    }
+
+    function switchScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+
+        if (screenId !== 'screen-qr' && isQrScanning) stopQrCamera();
+        if (screenId === 'screen-qr' && !isQrScanning) startQrCamera();
+
+        if (screenId !== 'screen-ar-marker' && isArScanning) stopArMarkerCamera();
+        if (screenId === 'screen-ar-marker' && !isArScanning) startArMarkerCamera();
+
+        if (screenId !== 'screen-ar-nav' && isArNavActive) stopArNavCamera();
+        if (screenId === 'screen-ar-nav' && !isArNavActive) startArNavCamera();
+
+        if (screenId === 'screen-map') initMap();
+        stopThreeJs();
+    }
+
+    function centerLocation() {
+        if (map) { map.flyTo([51.7195, 8.7555], 14, { animate: true }); showToast("Standort zentriert"); }
+    }
+
+    function updateRenderDist(val) { document.getElementById('render-dist-val').innerText = val + "m"; }
+
+    function openPoiDetail(poi) {
+        currentPoi = poi;
+        currentDetailMode = 'home';
+        document.getElementById('detail-title-text').innerText = poi.name + " | 5808893m";
+        closeMediaSelectorPopup();
+        updatePoiBottomButtons();
+        renderPoiContent();
+        switchScreen('screen-detail');
+    }
+
+    function updatePoiBottomButtons() {
+        if (!currentPoi) return;
+        const btn1 = document.getElementById('poi-btn-1');
+        const btn2 = document.getElementById('poi-btn-2');
+        const btn2Icon = document.getElementById('poi-btn-2-icon');
+        const btn3 = document.getElementById('poi-btn-3');
+        const btn3Icon = document.getElementById('poi-btn-3-icon');
+
+        btn1.classList.remove('active'); btn2.classList.remove('active'); btn3.classList.remove('active');
+        if (currentDetailMode === 'home') btn1.classList.add('active');
+        else if (currentDetailMode === 'photo' || currentDetailMode === 'video') btn2.classList.add('active');
+        else if (currentDetailMode === '360' || currentDetailMode === '3d') btn3.classList.add('active');
+
+        if (currentPoi.hasPhoto && currentPoi.hasVideo) { btn2Icon.className = "fa-solid fa-photo-film"; btn2.style.display = 'flex'; }
+        else if (currentPoi.hasVideo) { btn2Icon.className = "fa-solid fa-film"; btn2.style.display = 'flex'; }
+        else if (currentPoi.hasPhoto) { btn2Icon.className = "fa-solid fa-camera"; btn2.style.display = 'flex'; }
+        else { btn2.style.display = 'none'; }
+
+        if (currentPoi.has360) { btn3Icon.className = "fa-solid fa-vr-cardboard"; btn3.style.display = 'flex'; }
+        else if (currentPoi.has3D) { btn3Icon.className = "fa-solid fa-cube"; btn3.style.display = 'flex'; }
+        else { btn3.style.display = 'none'; }
+    }
+
+    function switchPoiMediaTab(mode) {
+        closeMediaSelectorPopup();
+        currentDetailMode = mode;
+        updatePoiBottomButtons();
+        renderPoiContent();
+    }
+
+    function handlePoiBtn2Click() {
+        if (!currentPoi) return;
+        if (currentPoi.hasPhoto && currentPoi.hasVideo) toggleMediaSelectorPopup();
+        else if (currentPoi.hasVideo) switchPoiMediaTab('video');
+        else if (currentPoi.hasPhoto) switchPoiMediaTab('photo');
+    }
+
+    function handlePoiBtn3Click() {
+        if (!currentPoi) return;
+        if (currentPoi.has360) switchPoiMediaTab('360');
+        else if (currentPoi.has3D) switchPoiMediaTab('3d');
+    }
+
+    function toggleMediaSelectorPopup() { document.getElementById('media-selector-popup').classList.toggle('active'); }
+    function closeMediaSelectorPopup() { document.getElementById('media-selector-popup').classList.remove('active'); }
+    function selectMergedMedia(type) {
+        closeMediaSelectorPopup();
+        if (type === 'video') switchPoiMediaTab('video');
+        else if (type === 'photo') switchPoiMediaTab('photo');
+    }
+
+    function renderPoiContent() {
+        const container = document.getElementById('detail-content-area');
+        const banner = document.getElementById('media-info-banner');
+        const bannerIcon = document.getElementById('media-banner-icon');
+        const bannerText = document.getElementById('media-banner-text');
+
+        stopThreeJs();
+        banner.style.display = 'none';
+        if (!currentPoi) return;
+
+        if (currentDetailMode === 'home') {
+            container.innerHTML = `<img src="${currentPoi.image}" class="poi-hero-img" onerror="this.src='https://placehold.co/600x300?text=Paderborn'"><div class="poi-text">${currentPoi.description}</div>`;
+        } else if (currentDetailMode === 'photo') {
+            let imagesHtml = currentPoi.gallery.map(img => `<img src="${img}" onerror="this.src='https://placehold.co/300x200?text=Bild'">`).join('');
+            container.innerHTML = `<div class="gallery-grid">${imagesHtml}</div>`;
+        } else if (currentDetailMode === 'video') {
+            container.innerHTML = `<div class="video-box"><video controls poster="${currentPoi.image}" autoplay muted loop style="width:100%; height:auto;"><source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4"></video></div>`;
+            bannerIcon.innerHTML = `<i class="fa-solid fa-film"></i>`;
+            bannerText.innerText = currentPoi.videoTitle || "3D Dokumentation";
+            banner.style.display = 'flex';
+        } else if (currentDetailMode === '360') {
+            container.innerHTML = `<div id="panorama-container"></div>`;
+            bannerIcon.innerHTML = `<i class="fa-solid fa-vr-cardboard"></i>`;
+            bannerText.innerText = currentPoi.panoTitle || "360° Foto";
+            banner.style.display = 'flex';
+            setTimeout(() => { pannellum.viewer('panorama-container', { type: 'equirectangular', panorama: currentPoi.panoImage, autoLoad: true }); }, 100);
+        } else if (currentDetailMode === '3d') {
+            container.innerHTML = `<div id="canvas-3d"></div>`;
+            bannerIcon.innerHTML = `<i class="fa-solid fa-cube"></i>`;
+            bannerText.innerText = currentPoi.modelTitle || "3D Modell";
+            banner.style.display = 'flex';
+            setTimeout(initThreeJs, 100);
+        }
+    }
+
+    function initThreeJs() {
+        const container = document.getElementById('canvas-3d');
+        if (!container) return;
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xffffff);
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(4, 3, 5); camera.lookAt(0, 0, 0);
+        threeRenderer = new THREE.WebGLRenderer({ antialias: true });
+        threeRenderer.setSize(container.clientWidth, container.clientHeight);
+        container.appendChild(threeRenderer.domElement);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+        dirLight.position.set(5, 10, 7); scene.add(dirLight);
+        const modelGroup = new THREE.Group();
+        const base = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.2, 2.5), new THREE.MeshStandardMaterial({ color: 0x334155 }));
+        base.position.y = -0.1; modelGroup.add(base);
+        scene.add(modelGroup);
+        function animate() {
+            threeAnimFrame = requestAnimationFrame(animate);
+            modelGroup.rotation.y += 0.008;
+            threeRenderer.render(scene, camera);
+        }
+        animate();
+    }
+
+    function stopThreeJs() {
+        if (threeAnimFrame) { cancelAnimationFrame(threeAnimFrame); threeAnimFrame = null; }
+        threeRenderer = null;
+    }
+
+    // Hilfsfunktion zur Entfernungsberechnung (Haversine-Formel in Metern)
+    function getDistanceMeters(lat1, lon1, lat2, lon2) {
+        const R = 6371e3;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    // Hilfsfunktion zur Richtungsberechnung (Bearing in Grad)
+    function getBearing(lat1, lon1, lat2, lon2) {
+        const y = Math.sin((lon2 - lon1) * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180);
+        const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
+                  Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos((lon2 - lon1) * Math.PI / 180);
+        let brng = Math.atan2(y, x) * 180 / Math.PI;
+        return (brng + 360) % 360;
+    }
+
+    // Text-Canvas-Textur für POI-Schilder mit Meter-Angabe erstellen
+    function createPoiLabelTexture(text) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 256; canvas.height = 128;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = 'rgba(28, 73, 102, 0.9)';
+        ctx.fillRect(0, 0, 256, 128);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 6;
+        ctx.strokeRect(3, 3, 250, 122);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 20px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(text, 128, 70);
+        return new THREE.CanvasTexture(canvas);
+    }
+
+    // ---------------- GEO-AR NAVIGATION (2. BUTTON) ----------------
+    async function startArNavCamera() {
+        if (isArNavActive) return;
+        const videoElem = document.getElementById('ar-nav-video');
+        const container = document.getElementById('ar-nav-canvas');
+        const infoElem = document.getElementById('ar-nav-info');
+        const compassBadge = document.getElementById('ar-compass-badge');
+        if (!videoElem || !container) return;
+
+        try {
+            arNavStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            videoElem.srcObject = arNavStream;
+        } catch (e) {
+            showToast("Kamerazugriff verweigert.");
+        }
+
+        // GPS ohne Fallback starten
+        if (navigator.geolocation) {
+            navigator.geolocation.watchPosition(
+                (pos) => {
+                    userLat = pos.coords.latitude;
+                    userLng = pos.coords.longitude;
+                    infoElem.innerText = "GPS aktiv";
+                    compassBadge.classList.add('active');
+                },
+                (err) => { 
+                    infoElem.innerText = "Warte auf GPS..."; 
+                    compassBadge.classList.remove('active'); 
+                },
+                { enableHighAccuracy: true }
+            );
+        }
+
+        window.addEventListener('deviceorientation', handleOrientation, true);
+
+        arNavScene = new THREE.Scene();
+        arNavCamera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+        arNavThreeRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        arNavThreeRenderer.setSize(container.clientWidth, container.clientHeight);
+        container.innerHTML = '';
+        container.appendChild(arNavThreeRenderer.domElement);
+
+        arNavScene.add(new THREE.AmbientLight(0xffffff, 1));
+
+        // 3D-Schilder für alle geladenen POIs anlegen
+        arPoiMeshes = [];
+        pois.forEach(poi => {
+            const texture = createPoiLabelTexture(poi.name);
+            const geometry = new THREE.PlaneGeometry(3, 1.5);
+            const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.userData = { lat: poi.lat, lng: poi.lng, name: poi.name };
+            mesh.visible = false;
+            arNavScene.add(mesh);
+            arPoiMeshes.push(mesh);
+        });
+
+        // Sehr kleiner Videospiel-HUD-Richtungs-Pfeil oben im Display
+        const arrowGeo = new THREE.ConeGeometry(0.12, 0.4, 8);
+        const arrowMat = new THREE.MeshBasicMaterial({ color: 0x3b82f6 });
+        arNavArrowMesh = new THREE.Mesh(arrowGeo, arrowMat);
+        arNavArrowMesh.position.set(0, 1.8, -3); // Oben fixiert als HUD
+        arNavScene.add(arNavArrowMesh);
+
+        function animateArNav() {
+            arNavAnimFrame = requestAnimationFrame(animateArNav);
+
+            // Nur rendern, wenn GPS-Koordinaten vorhanden sind
+            if (userLat !== null && userLng !== null) {
+                let nearestDist = Infinity;
+                let nearestBearing = 0;
+
+                arPoiMeshes.forEach(mesh => {
+                    const dist = getDistanceMeters(userLat, userLng, mesh.userData.lat, mesh.userData.lng);
+                    const bearing = getBearing(userLat, userLng, mesh.userData.lat, mesh.userData.lng);
+
+                    if (dist < nearestDist) {
+                        nearestDist = dist;
+                        nearestBearing = bearing;
+                    }
+
+                    // Dynamische Entfernungs-Textur erneuern
+                    const distRounded = Math.round(dist);
+                    mesh.material.map = createPoiLabelTexture(`${mesh.userData.name}\n${distRounded}m`);
+                    mesh.material.map.needsUpdate = true;
+
+                    // Relativer Winkel zur Blickrichtung des Nutzers
+                    let angleDiff = bearing - userHeading;
+                    while (angleDiff < -180) angleDiff += 360;
+                    while (angleDiff > 180) angleDiff -= 360;
+
+                    const rad = angleDiff * (Math.PI / 180);
+                    const x = Math.sin(rad) * Math.min(dist, 30);
+                    const z = -Math.cos(rad) * Math.min(dist, 30);
+
+                    mesh.position.set(x, 0, z);
+                    mesh.visible = dist <= 1000; // Bis zu 1000m anzeigen
+                });
+
+                // HUD-Pfeil in Richtung des nächstgelegenen POIs drehen
+                if (arNavArrowMesh && nearestDist !== Infinity) {
+                    let arrowAngle = nearestBearing - userHeading;
+                    arNavArrowMesh.rotation.z = -arrowAngle * (Math.PI / 180);
+                }
+            }
+
+            arNavThreeRenderer.render(arNavScene, arNavCamera);
+        }
+        animateArNav();
+        isArNavActive = true;
+    }
+
+    function stopArNavCamera() {
+        if (arNavStream) {
+            arNavStream.getTracks().forEach(track => track.stop());
+            arNavStream = null;
+        }
+        if (arNavAnimFrame) {
+            cancelAnimationFrame(arNavAnimFrame);
+            arNavAnimFrame = null;
+        }
+        window.removeEventListener('deviceorientation', handleOrientation, true);
+        isArNavActive = false;
+    }
+
+    function handleOrientation(e) {
+        if (e.alpha !== null) {
+            userHeading = e.alpha;
+            document.getElementById('ar-compass-badge').classList.add('active');
+        }
+    }
+
+    // ---------------- AR MARKER SCANNER (MINDAR INTEGRATION) ----------------
+    async function startArMarkerCamera() {
+        if (isArScanning) return;
+        const container = document.getElementById('ar-scene-container');
+        if (!container) return;
+        showToast("AR-Kamera wird geladen...");
+
+        const targetsUrl = GITHUB_REPO_BASE + 'ar-markers/targets.mind';
+        const configUrl = GITHUB_REPO_BASE + 'ar-markers/config.json';
+
+        try {
+            let configRes = await fetch(configUrl);
+            let arConfig = await configRes.json();
+            let firstOverlay = arConfig[0] || { src: '', scale: [1,1,1] };
+
+            container.innerHTML = `
+                <a-scene mindar-image="imageTargetSrc: ${targetsUrl}; autoStart: true; uiLoading: no; uiError: no;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" style="width: 100%; height: 100%;">
+                    <a-assets>
+                        <img id="ar-overlay-img" src="${firstOverlay.src}" crossorigin="anonymous">
+                    </a-assets>
+                    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+                    <a-entity mindar-image-target="targetIndex: 0">
+                        <a-plane src="#ar-overlay-img" position="0 0 0" height="1" width="1" rotation="0 0 0" scale="${firstOverlay.scale.join(' ')}"></a-plane>
+                    </a-entity>
+                </a-scene>
+            `;
+            isArScanning = true;
+        } catch (e) {
+            showToast("AR-Konfiguration konnte nicht geladen werden.");
+            isArScanning = false;
+        }
+    }
+
+    function stopArMarkerCamera() {
+        const container = document.getElementById('ar-scene-container');
+        if (container) container.innerHTML = '';
+        isArScanning = false;
+    }
+
+    // QR SCANNER
+    async function startQrCamera() {
+        if (isQrScanning) return;
+        const qrElement = document.getElementById("qr-reader-fullscreen");
+        if (!qrElement) return;
+        await new Promise(resolve => setTimeout(resolve, 300));
+        if (!html5QrCode) html5QrCode = new Html5Qrcode("qr-reader-fullscreen");
+        try {
+            await html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 220, height: 220 } }, onQrCodeScanned, () => {});
+            isQrScanning = true;
+        } catch (envErr) {
+            try {
+                await html5QrCode.start({ facingMode: "user" }, { fps: 10, qrbox: { width: 220, height: 220 } }, onQrCodeScanned, () => {});
+                isQrScanning = true;
+            } catch (userErr) {
+                isQrScanning = false;
+                showToast("Kamerazugriff verweigert (Bitte HTTPS prüfen)");
+            }
+        }
+    }
+
+    function stopQrCamera() {
+        if (html5QrCode && isQrScanning) {
+            html5QrCode.stop().then(() => { try { html5QrCode.clear(); } catch(e) {} isQrScanning = false; }).catch(() => { isQrScanning = false; });
+        } else { isQrScanning = false; }
+    }
+
+    function onQrCodeScanned(qrMessage) {
+        currentScannedResult = qrMessage;
+        if (isQrScanning) stopQrCamera();
+        document.getElementById('qr-result-text').innerText = qrMessage;
+        document.getElementById('qr-modal').classList.add('active');
+    }
+
+    function handleQrAction() {
+        closeQrModal();
+        if (currentScannedResult.startsWith('poi:')) {
+            const targetPoi = pois.find(p => p.id === currentScannedResult.replace('poi:', ''));
+            if (targetPoi) openPoiDetail(targetPoi);
+        } else if (currentScannedResult.startsWith('http')) {
+            window.open(currentScannedResult, '_blank');
+        }
+    }
+
+    function closeQrModal() { document.getElementById('qr-modal').classList.remove('active'); }
+
+    function toggleFavorite() {
+        const icon = document.getElementById('fav-icon');
+        icon.classList.toggle('fa-regular'); icon.classList.toggle('fa-solid');
+        showToast(icon.classList.contains('fa-solid') ? "Favorit gespeichert" : "Favorit entfernt");
+    }
+
+    function showToast(message) {
+        const toast = document.createElement('div');
+        toast.style.position = 'absolute'; toast.style.top = '70px'; toast.style.left = '50%';
+        toast.style.transform = 'translateX(-50%)'; toast.style.background = 'rgba(15, 23, 42, 0.9)';
+        toast.style.color = '#ffffff'; toast.style.padding = '8px 16px'; toast.style.borderRadius = '20px';
+        toast.style.fontSize = '12px'; toast.style.zIndex = '2000'; toast.innerText = message;
+        document.querySelector('.app-container').appendChild(toast);
+        setTimeout(() => toast.remove(), 2000);
+    }
+
+    window.onload = startAppFlow;
+</script>
+</body>
+</html>
